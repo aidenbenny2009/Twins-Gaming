@@ -1,0 +1,21 @@
+# Render Blueprint (Render dashboard -> New -> Blueprint -> pick this repo, branch forum-backend).
+# The database is not created here: use a free Neon database and paste its connection string into DATABASE_URL.
+services:
+  - type: web
+    name: twins-forum
+    runtime: docker
+    plan: free
+    branch: forum-backend
+    rootDir: forum
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: PUBLIC_URL
+        sync: false
