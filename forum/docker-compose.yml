@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres:16
+    environment: { POSTGRES_USER: twins, POSTGRES_PASSWORD: change-me, POSTGRES_DB: twins }
+    volumes: [pgdata:/var/lib/postgresql/data]
+  api:
+    build: .
+    env_file: .env
+    environment: { DATABASE_URL: postgres://twins:change-me@db:5432/twins }
+    ports: ["3000:3000"]
+    volumes: [./data:/app/data]
+    depends_on: [db]
+volumes: { pgdata: {} }

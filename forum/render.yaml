@@ -1,0 +1,18 @@
+# Render Blueprint: Render dashboard -> New -> Blueprint -> pick this repo.
+# The database is NOT created here: use a free Neon database and paste its connection string into DATABASE_URL.
+services:
+  - type: web
+    name: twins-forum
+    runtime: docker
+    plan: free
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false        # paste the Neon connection string (ends with ?sslmode=require)
+      - key: PUBLIC_URL
+        sync: false        # e.g. https://twins-forum.onrender.com  (exactly the address people open)
