@@ -16,3 +16,9 @@ services:
         sync: false        # paste the Neon connection string (ends with ?sslmode=require)
       - key: PUBLIC_URL
         sync: false        # e.g. https://twins-forum.onrender.com  (exactly the address people open)
+      - key: OWNER_USERNAME
+        sync: false
+      - key: OWNER_EMAIL
+        sync: false
+      - key: OWNER_PASSWORD
+        sync: false        # delete this setting after your first login

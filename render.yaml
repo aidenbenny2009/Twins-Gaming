@@ -19,3 +19,9 @@ services:
         sync: false
       - key: PUBLIC_URL
         sync: false
+      - key: OWNER_USERNAME
+        sync: false
+      - key: OWNER_EMAIL
+        sync: false
+      - key: OWNER_PASSWORD
+        sync: false        # delete this setting after your first login

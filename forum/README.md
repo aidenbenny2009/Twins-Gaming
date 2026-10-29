@@ -59,7 +59,7 @@ Admin → Forums & categories saves to the database: categories, nested forums (
 ## Going live (checklist)
 1. **Database**: create a PostgreSQL database and set `DATABASE_URL` (add `?sslmode=require` for hosted ones). Never run production without it: without `DATABASE_URL` the app uses a temporary in-memory database and everything is lost on restart.
 2. **Secrets**: `SESSION_SECRET` (32+ random characters), `PUBLIC_URL` = the exact https address people open (cookies and the CSRF origin check depend on it), `NODE_ENV=production`.
-3. **Schema + Owner**: run `npm run migrate`, then once from your own computer with the same `DATABASE_URL`: `OWNER_PASSWORD='long-unique-password' npm run create-owner -- YourName you@example.com`.
+3. **Schema + Owner**: the schema is created automatically on start. To create the Owner without a terminal, set `OWNER_USERNAME`, `OWNER_EMAIL` and `OWNER_PASSWORD` (12+ characters) on the host for the first start, then **delete `OWNER_PASSWORD`** after you log in. (Terminal alternative: `OWNER_PASSWORD='...' npm run create-owner -- YourName you@example.com`.)
 4. Log in as Owner, **turn on two-factor** and save the recovery codes, then set the Discord/Instagram/YouTube links, site name, logo and footer text in the admin panel.
 5. Optional: `SMTP_URL` (email confirmation and password reset), `GOOGLE_CLIENT_ID`, Turnstile keys.
 6. **Backups**: dump the database regularly (`pg_dump`) and keep a copy off the host.
