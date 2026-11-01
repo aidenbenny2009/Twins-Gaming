@@ -2,7 +2,8 @@ import { Router } from 'express';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { wrap, bad, str, int, oneOf, paging, csv, forbid, nf, HttpError } from '../util.js';
-import { PERMS, DEFAULT_SETTINGS } from '../seed.js';
+import { PERMS, DEFAULT_SETTINGS, BASE, MOD } from '../seed.js';
+const DEFAULT_MEMBER_PERMS = BASE, DEFAULT_STAFF_PERMS = MOD;
 import { purge } from '../purge.js';
 
 const EXPORTS = { users: 'id,username,display_name,email,email_verified,status,banned_until,reg_ip,last_ip,created_at,last_login_at', audit_logs: '*', security_logs: '*', login_attempts: '*', threads: '*', posts: 'id,thread_id,author_id,created_at,deleted_at,left(body,2000) AS body', reports: '*', sanctions: '*' };
@@ -90,7 +91,7 @@ export default function (ctx) {
   r.get('/admin/permissions', M, (req, res) => res.json(Object.entries(PERMS).map(([key, description]) => ({ key, description }))));
   r.get('/admin/roles', M, wrap(async (req, res) => res.json(await db.q("SELECT r.*, COALESCE((SELECT json_agg(perm_key) FROM role_permissions WHERE role_id=r.id),'[]') AS perms, (SELECT count(*)::int FROM user_roles WHERE role_id=r.id) AS members FROM roles r ORDER BY sort,id"))));
   const setPerms = async (t, id, perms) => { await t.q('DELETE FROM role_permissions WHERE role_id=$1', [id]); for (const p of perms) { if (!PERMS[p]) throw bad('Unknown permission ' + p); await t.q('INSERT INTO role_permissions VALUES ($1,$2)', [id, p]); } };
-  r.post('/admin/roles', ctx.ownerOnly, wrap(async (req, res) => { const b = req.body; const role = await db.tx(async t => { const x = await t.one('INSERT INTO roles (name,color,is_staff,sort) VALUES ($1,$2,$3,$4) RETURNING *', [str(b.name, 'Name', { max: 40 }), b.color || '#7c5cff', !!b.is_staff, +b.sort || 50]); await setPerms(t, x.id, b.perms || []); return x; }); await ctx.audit(req, 'role_create', 'role', role.id, null, b); res.status(201).json(role); }));
+  r.post('/admin/roles', ctx.ownerOnly, wrap(async (req, res) => { const b = req.body; const role = await db.tx(async t => { const x = await t.one('INSERT INTO roles (name,color,is_staff,sort) VALUES ($1,$2,$3,$4) RETURNING *', [str(b.name, 'Name', { max: 40 }), b.color || '#7c5cff', !!b.is_staff, +b.sort || 50]); await setPerms(t, x.id, Array.isArray(b.perms) ? b.perms : (b.is_staff ? DEFAULT_STAFF_PERMS : DEFAULT_MEMBER_PERMS)); return x; }); await ctx.audit(req, 'role_create', 'role', role.id, null, b); res.status(201).json(role); }));
   r.patch('/admin/roles/:id', ctx.ownerOnly, wrap(async (req, res) => { const id = int(req.params.id), b = req.body, old = await db.one('SELECT * FROM roles WHERE id=$1', [id]); if (!old) throw nf();
     const before = await db.q('SELECT perm_key FROM role_permissions WHERE role_id=$1', [id]);
     await db.tx(async t => { await t.q('UPDATE roles SET name=COALESCE($2,name), color=COALESCE($3,color), is_staff=COALESCE($4,is_staff), sort=COALESCE($5,sort) WHERE id=$1', [id, b.name ?? null, b.color ?? null, b.is_staff ?? null, b.sort ?? null]); if (Array.isArray(b.perms)) await setPerms(t, id, b.perms); });

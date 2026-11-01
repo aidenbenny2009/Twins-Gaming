@@ -123,7 +123,7 @@ export default function (ctx) {
       await ctx.secLog(req, 'register_google', u.id);
     } else {
       if (u.google_sub && u.google_sub !== p.sub) throw new HttpError(401, 'Google sign-in failed');
-      await db.q('UPDATE users SET google_sub=$2, email_verified=true, avatar_url=COALESCE(avatar_url,$3) WHERE id=$1', [u.id, p.sub, /^https:\/\//.test(p.picture || '') ? p.picture : null]);
+      await db.q('UPDATE users SET google_sub=$2, email_verified=true, avatar_url=CASE WHEN avatar_url IS NULL OR avatar_url LIKE \'https://%.googleusercontent.com/%\' THEN COALESCE($3,avatar_url) ELSE avatar_url END WHERE id=$1', [u.id, p.sub, /^https:\/\//.test(p.picture || '') ? p.picture : null]);
       u = await db.one('SELECT * FROM users WHERE id=$1', [u.id]);
     }
     if (u.status !== 'active') throw forbid('This account is disabled');

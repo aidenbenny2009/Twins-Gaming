@@ -135,7 +135,7 @@ export default function (ctx) {
     const catRow = await db.one('SELECT no_threads FROM categories WHERE id=$1', [f.category_id]); if (catRow?.no_threads) throw forbid('Posting threads is turned off in this section');
     for (let p = f.parent_id, n = 0; p && n < 20; n++) { const a = await db.one('SELECT parent_id, thread_perm FROM forums WHERE id=$1', [p]); if (!a) break; if (a.thread_perm === 'NO_ONE') throw forbid('Posting threads is turned off in the parent forum'); p = a.parent_id; }
     let prefix = null;
-    if (req.body.prefix_id) { prefix = int(req.body.prefix_id, 'prefix_id'); if (Array.isArray(f.allowed_prefixes) && !f.allowed_prefixes.includes(prefix)) throw bad('Prefix not allowed in this forum'); const pr = await db.one('SELECT advanced FROM prefixes WHERE id=$1', [prefix]); if (!pr) throw bad('Unknown prefix'); if (pr.advanced && !u.is_owner && !u.isStaff) throw forbid('Advanced prefixes are for staff only'); }
+    if (req.body.prefix_id) { prefix = int(req.body.prefix_id, 'prefix_id'); if (Array.isArray(f.allowed_prefixes) && !f.allowed_prefixes.includes(prefix) && !u.is_owner && !u.isStaff) throw bad('Prefix not allowed in this forum'); const pr = await db.one('SELECT advanced FROM prefixes WHERE id=$1', [prefix]); if (!pr) throw bad('Unknown prefix'); if (pr.advanced && !u.is_owner && !u.isStaff) throw forbid('Advanced prefixes are for staff only'); }
     if (!u.email_verified) throw forbid('Confirm your email first');
     await antiSpam(req, body);
     const approved = !f.require_moderation || can(u, 'APPROVE_CONTENT');
