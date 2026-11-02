@@ -216,6 +216,10 @@ div[style*="--pbw"]+div{padding-left:146px!important}div[style*="--pbw"]+div .st
 #app .hero2.bnr.wbn>div{position:relative;z-index:2;max-width:480px!important;font-size:15px;line-height:1.6}
 #app .hero2.bnr.wbn .bnlogo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:250px!important;height:250px!important;margin:0;z-index:1;opacity:.95}
 @media(max-width:760px){#app .hero2.bnr.wbn .bnlogo{left:auto;right:-40px;width:180px!important;height:180px!important;opacity:.35}}
+#ckn{position:fixed;left:0;right:0;bottom:0;z-index:9999;display:flex;background:#fff;color:#2a2a3c;border:1px solid #4b3a8f;font-size:14px;box-shadow:0 -4px 20px rgba(0,0,0,.15)}
+#ckn .ckI{width:48px;background:#4b3a8f;color:#fff;display:grid;place-items:center;font-weight:700;font-size:20px;flex:none}
+#ckn .ckM{flex:1;text-align:center;padding:14px 16px}#ckn .ckB{margin-top:10px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+#ckn .ckY{background:#ffc828;color:#1d1d00;font-weight:600;font-size:12px;letter-spacing:.5px;padding:12px 22px;border-radius:12px;cursor:pointer;box-shadow:0 3px 0 #d9a400}
 </style><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&display=swap"></head><body><div id="app"></div>
 <script>
 const PERMS=['VIEW_FORUM','CREATE_THREAD','REPLY','DELETE_ANY_POST','LOCK_THREADS','PIN_THREADS','BAN_USERS','MANAGE_FORUMS','MANAGE_USERS','VIEW_AUDIT_LOGS','MANAGE_THEME','MANAGE_ROLES','MANAGE_SETTINGS'];
@@ -2600,6 +2604,12 @@ return `<div class="card"><h3>RSS feed (latest threads)</h3><div class="mu" styl
  const _go=go;go=function(v,id,tab,pg){if(v==='rules'||v==='rulelist'||v==='rule'){let f=null;S.cats.forEach(c=>c.f.forEach(x=>{if(!f&&/rules/i.test(x.n))f=x}));if(f)return _go('forum',f.id)}return _go.apply(this,arguments)};
  const _r2=render;render=function(){const x=_r2.apply(this,arguments);try{if(!me()){const s=document.querySelector('.sbr');if(s&&!s.querySelector('.npb')){const a=document.createElement('a');a.className='npb';a.textContent='⚡ NEW POSTS';a.onclick=()=>go('newposts');s.insertBefore(a,s.firstChild)}}document.querySelectorAll('.hero2.bnr.wbn').forEach(h=>{})}catch(e){}return x};
 })();
+
+/* ===== cookie notice like the reference ===== */
+(function(){let ok=false;try{ok=localStorage.getItem('tg_cookies')==='1'}catch(e){}
+ function show(){if(ok||document.getElementById('ckn'))return;const d=document.createElement('div');d.id='ckn';d.innerHTML='<div class="ckI">!</div><div class="ckM"><div>This site uses cookies to help personalise content, tailor your experience and to keep you logged in if you register.<br>By continuing to use this site, you are consenting to our use of cookies.</div><div class="ckB"><a class="ckY" id="ckA">✓ ACCEPT</a><a class="ckY" id="ckL">LEARN MORE…</a></div></div>';document.body.appendChild(d);
+  document.getElementById('ckA').onclick=()=>{ok=true;try{localStorage.setItem('tg_cookies','1')}catch(e){}d.remove()};document.getElementById('ckL').onclick=()=>go('help',0,'cookies')}
+ setTimeout(show,600)})();
 
 bootOnline();
 
