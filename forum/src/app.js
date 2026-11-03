@@ -171,6 +171,8 @@ export function createApp(db, cfg) {
     const fs_ = await db.q(`SELECT f.id FROM forums f WHERE ${PUB} AND f.link_url IS NULL ORDER BY f.id`), ts = await db.q(`SELECT t.id,t.last_post_at FROM threads t JOIN forums f ON f.id=t.forum_id WHERE t.deleted_at IS NULL AND t.approved AND ${PUB} ORDER BY t.id DESC LIMIT 5000`);
     res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${ex(cfg.publicUrl)}/</loc></url>${fs_.map(f => `<url><loc>${ex(cfg.publicUrl)}/f/${f.id}</loc></url>`).join('')}${ts.map(t => `<url><loc>${ex(cfg.publicUrl)}/t/${t.id}</loc><lastmod>${new Date(t.last_post_at).toISOString()}</lastmod></url>`).join('')}</urlset>`);
   }));
+  // Google Search Console HTML-file verification: set GOOGLE_VERIFICATION_FILE=googleXXXXXXXX.html in the environment
+  app.get(/^\/(google[0-9a-f]{8,40}\.html)$/, (req, res) => { const f = process.env.GOOGLE_VERIFICATION_FILE || ''; if (req.params[0] !== f) return res.sendStatus(404); res.type('text/html').send('google-site-verification: ' + f); });
   app.get('/robots.txt', wrap(async (req, res) => {
     const seo = await ctx.setting('seo'); const idx = !/noindex/i.test(seo?.robots || '');
     res.type('text/plain').send(`User-agent: *\n${idx ? 'Allow: /\nDisallow: /api/' : 'Disallow: /'}\nSitemap: ${cfg.publicUrl}/sitemap.xml\n`);

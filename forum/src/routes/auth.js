@@ -36,12 +36,14 @@ export default function (ctx) {
     if (!EMAIL.test(email)) throw bad('Invalid email address');
     const pw = req.body.password; const pp = passwordProblem(pw, await ctx.setting('min_password_length')); if (pp) throw bad(pp);
     if (pw.toLowerCase().includes(username.toLowerCase())) throw bad('Password must not contain your username');
+    let birth = null; if (req.body.birth_date !== undefined && req.body.birth_date !== '') { if (!/^\d{4}-\d{2}-\d{2}$/.test(String(req.body.birth_date))) throw bad('Invalid date of birth'); const bd = new Date(req.body.birth_date + 'T00:00:00Z'); if (isNaN(bd) || bd > new Date()) throw bad('Invalid date of birth'); const age = (Date.now() - bd.getTime()) / 31557600000; if (age < 13) throw bad('You must be at least 13 years old to register'); birth = req.body.birth_date; }
+    const discord = req.body.discord ? str(req.body.discord, 'Discord', { max: 40 }) : null;
     const today = await db.one("SELECT count(*)::int n FROM users WHERE reg_ip=$1 AND created_at > now() - interval '1 day'", [req.ip]);
     if (today.n >= 5) { await ctx.secLog(req, 'register_ip_limit', null); throw new HttpError(429, 'Too many accounts from this network today'); }
     const needVerify = await ctx.setting('require_email_verification');
     let u;
     try {
-      u = await db.one('INSERT INTO users (username,display_name,email,password_hash,email_verified,reg_ip,last_ip) VALUES ($1,$1,$2,$3,$4,$5,$5) RETURNING *', [username, email, await hashPassword(pw), !needVerify, req.ip]);
+      u = await db.one('INSERT INTO users (username,display_name,email,password_hash,email_verified,reg_ip,last_ip,birth_date,discord) VALUES ($1,$1,$2,$3,$4,$5,$5,$6,$7) RETURNING *', [username, email, await hashPassword(pw), !needVerify, req.ip, birth, discord]);
     } catch (e) { if (e.code === '23505') throw new HttpError(409, 'That username or email is already registered'); throw e; }
     await ctx.secLog(req, 'register', u.id);
     if (needVerify) { const t = await issueEmailToken(u.id, 'verify', 24); await ctx.mail.send(email, 'verify', { username, link: `${cfg.publicUrl}/verify?token=${t}` }); }
