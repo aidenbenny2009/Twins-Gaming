@@ -258,6 +258,16 @@ body.dk footer.ft{background:#32435d!important}
 body.dk .tgdlg,body.dk .srp{background:#fff}
 body.dk .cd2,body.dk .qt{border-color:#2fa4e7}
 .tgh a{color:#fff!important}body.dk .npb,body.dk .ybtn{color:#1d1d00!important}
+/* v56 */
+.nrow{align-items:center}.nrow .tt2{font-size:15px;font-weight:400;color:var(--tx);cursor:pointer}.nrow .sub2{font-size:11px;color:var(--mu);margin-top:2px}.nrow .fn2{color:var(--mu)}
+.nrow .ic{display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:400;color:var(--tx)}.nrow .lk2{width:30px;color:var(--mu)}.nrow .c1{width:160px}.nrow .c2{width:160px}
+.nrow .dot,.nrow .newb{display:none!important}
+.odot{right:auto!important;bottom:auto!important;top:-2px;left:-2px;width:10px;height:10px}
+.lpc .lphd{background:#0aa0ec;color:#fff;padding:12px 16px;font-size:16px;font-weight:500}.lpft{background:var(--sh);padding:12px 14px;display:flex;justify-content:flex-end;border-top:1px solid var(--line)}
+.arow{display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);align-items:flex-start}.arow .at{font-size:15px;line-height:1.5}.arow .at a{cursor:pointer;color:var(--tx)}.arow .asn{font-size:12px;color:var(--tx);margin-top:4px}.arow .asm{font-size:11px;margin-top:4px}
+.ttabs a{color:#8a9bb5}.ttabs a.on{color:var(--tx)}
+.pgn a{font-size:12px}.pgn a.on{background:#ee4a85;color:#fff}.pgn a:not(.on):not(.gap){background:#0aa0ec;color:#fff}
+.arow .at,.arow .at a,.arow .at b{font-weight:400!important}
 </style><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&display=swap"></head><body><div id="app"></div>
 <script>
 const PERMS=['VIEW_FORUM','CREATE_THREAD','REPLY','DELETE_ANY_POST','LOCK_THREADS','PIN_THREADS','BAN_USERS','MANAGE_FORUMS','MANAGE_USERS','VIEW_AUDIT_LOGS','MANAGE_THEME','MANAGE_ROLES','MANAGE_SETTINGS'];
@@ -2735,8 +2745,8 @@ return `<div class="card"><h3>RSS feed (latest threads)</h3><div class="mu" styl
   const row=(l,f,sub)=>`<div class="tgr"><label>${l}${sub?`<small>${sub}</small>`:''}</label><div>${f}</div></div>`;
   let rows='';
   if(on){
-   if(reg){rows=row('Email:',`<input id="oe" type="email" autocomplete="email">`,'Required')+row('Password:',`<div class="pw"><input id="op" type="password" autocomplete="new-password"><a onclick="pwShow()">${EYE} Show</a></div>`,'Required')+row('Nickname:',`<input id="ou" maxlength="24" autocomplete="username">`,'Required')+(CAP&&CAP.question?row('Verification:',`<span>${E(CAP.question)}</span> <input id="oc" style="width:110px" placeholder="Answer">`,'Required'):'')+`<div class="tgr"><label></label><div><label class="agr"><input type="checkbox" id="oagree"> I agree to the <a onclick="go('page',0,'terms')">terms</a> and <a onclick="go('page',0,'privacy')">privacy policy</a>.</label></div></div>`}
-   else{rows=row('Your name or email address:',`<input id="ou" autocomplete="username">`)+row('Password:',`<div class="pw"><input id="op" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuth()"><a onclick="pwShow()">${EYE} Show</a></div><a class="fgt" onclick="forgotPw()">Forgot your password?</a>`)+(NEED2?row('2FA code:',`<input id="ot" autocomplete="one-time-code">`):'')+(CAP&&CAP.question&&CAP.show?row('Verification:',`<span>${E(CAP.question)}</span> <input id="oc" style="width:110px">`):'')+`<div class="tgr"><label></label><div><label class="agr"><input type="checkbox" checked> Stay logged in</label></div></div>`}
+   if(reg){rows=row('Email:',`<input id="oe" type="email" autocomplete="email">`,'Required')+row('Password:',`<div class="pw"><input id="op" type="password" autocomplete="new-password"><a onclick="pwShow()">${EYE} Show</a></div>`,'Required')+row('Nickname:',`<input id="ou" maxlength="24" autocomplete="username">`,'Required')+(CAP&&CAP.question?row('CAPTCHA:',`<span>${E(CAP.question)}</span> <input id="oc" style="width:110px" placeholder="Answer">`,'Required'):'')+`<div class="tgr"><label></label><div><label class="agr"><input type="checkbox" id="oagree"> I agree to the <a onclick="go('page',0,'terms')">terms</a> and <a onclick="go('page',0,'privacy')">privacy policy</a>.</label></div></div>`}
+   else{rows=row('Your name or email address:',`<input id="ou" autocomplete="username">`)+row('Password:',`<div class="pw"><input id="op" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuth()"><a onclick="pwShow()">${EYE} Show</a></div><a class="fgt" onclick="forgotPw()">Forgot your password?</a>`)+(NEED2?row('2FA code:',`<input id="ot" autocomplete="one-time-code">`):'')+(CAP&&CAP.question&&CAP.show?row('CAPTCHA:',`<span>${E(CAP.question)}</span> <input id="oc" style="width:110px">`):'')+`<div class="tgr"><label></label><div><label class="agr"><input type="checkbox" checked> Stay logged in</label></div></div>`}
   }else{rows=row('Your name:',`<input id="un" maxlength="24">`)+row('Email:',`<input id="em" type="email">`,'New accounts')}
   const btn=reg?'REGISTER':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2.4"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg> LOG IN';
   const act=on?(reg?"authReg()":"doAuth()"):"login()";
@@ -2767,6 +2777,27 @@ return `<div class="card"><h3>RSS feed (latest threads)</h3><div class="mu" styl
  }catch(e){}return x};
  /* ---------- 8. first load: open the page from the link ---------- */
  const _b2=bootOnline;bootOnline=async function(){await _b2.apply(this,arguments);BOOTDONE=true;try{const p=parse(location.hash||'');if(p&&p[0]!=='home'&&p[0]!=='auth'){LAST=location.hash;POP=true;try{_go.apply(null,p)}finally{POP=false}}else{LAST='#/'}}catch(e){}title()};
+})();
+
+/* ===== v56: New posts / What's new / Latest activity like the reference; guest menus ===== */
+(function(){
+ const E=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+ const LOCK='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>';
+ nrows=function(list){return list.map(t=>{const a=U(t.posts[0].a),l=lastP(t),f=fById(t.fid);
+  return `<div class="nrow"><span class="aw">${av(a?a.n:'?')}</span><div class="g">${chip(t)}<a class="tt2" onclick="go('thread','${t.id}')">${E(t.title)}</a><div class="sub2"><span style="color:${a?role(a.role).c:'inherit'};font-weight:600">${E(a?a.n:'?')}</span> · ${ago(t.posts[0].t)} · <span class="fn2">${E(f?f.n:'')}</span></div></div><span class="ic lk2">${t.lock?LOCK:''}</span><span class="ic c1">${t.posts.length-1}</span><span class="ic c2">${t.views}</span><span class="nl"><span>${ago(t.last)}<br><b style="color:${l?role(l.role).c:'inherit'}">${E(l?l.n:'?')}</b></span>${av(l?l.n:'?')}</span></div>`}).join('')||'<div class="plain mu">There are no threads to display.</div>'};
+ whatsnew=function(){return crumb([['Home',"go('home')"],['Forums',"go('home')"]],"What's new",postBtnH())+tabsBar(WT,'whats')+`<div class="card vis lpc"><div class="lphd">Latest posts</div>${nrows([...S.threads].sort((a,b)=>b.last-a.last).slice(0,10))}<div class="lpft"><a class="ybtn" onclick="go('newposts')">View more…</a></div></div>`};
+ const _feed=feed;
+ feed=function(){if(V.tab==='mine')return _feed.apply(this,arguments);
+  const per=20,pg=V.pg||1,all=[...S.threads].sort((a,b)=>b.last-a.last),items=all.slice(0,pg*per);
+  const rows=items.map(t=>{const l=lastP(t),body=l&&(l.b||l.body||l.text)||'';const sn=String(body).replace(/\[[^\]]*\]/g,'').replace(/\s+/g,' ').trim().slice(0,160);
+   const nm=l?l.n||(U(l.a)&&U(l.a).n)||'?':'?';
+   return `<div class="arow"><span class="aw">${av(nm)}</span><div class="g"><div class="at">${E(nm)} replied to the thread ${chip(t)} <a onclick="go('thread','${t.id}')">${E(t.title)}</a>.</div>${sn?`<div class="asn">${E(sn)}</div>`:''}<div class="mu asm">${ago(t.last)}</div></div></div>`}).join('')||'<div class="plain mu">Nothing to show yet.</div>';
+  return crumb([['Home',"go('home')"],["What's new","go('whatsnew')"]],'Latest activity',postBtnH())+tabsBar(WT,'feed')+`<div class="card vis">${rows}${all.length>items.length?`<div class="lpft"><a class="ybtn" onclick="go('feed',0,'',${pg+1})">Show older items</a></div>`:''}</div>`};
+ /* guests: hide member-only options */
+ const _r=render;render=function(){const x=_r.apply(this,arguments);try{if(!me()){
+   document.querySelectorAll('.sbar .dd').forEach(e=>e.remove());document.querySelectorAll('.sbar a[onclick="markRead()"]').forEach(e=>e.remove());
+   document.querySelectorAll('.ttabs a').forEach(a=>{if(/profposts|'mine'/.test(a.getAttribute('onclick')||''))a.remove()});
+   document.querySelectorAll('.fbar .pill2,.fhd2').forEach(e=>e.remove())}}catch(e){}return x};
 })();
 
 bootOnline();
