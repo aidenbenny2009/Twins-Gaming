@@ -258,6 +258,8 @@ body.dk footer.ft{background:#32435d!important}
 body.dk .tgdlg,body.dk .srp{background:#fff}
 body.dk .cd2,body.dk .qt{border-color:#2fa4e7}
 .tgh a{color:#fff!important}body.dk .npb,body.dk .ybtn{color:#1d1d00!important}
+
+.capbox{display:flex;align-items:center;gap:10px}.capq{background:#eef1f7;border:1px solid #dfe4ee;border-radius:6px;padding:10px 14px;font-weight:600;letter-spacing:.5px}.capbox input{width:130px!important}.tsw{min-height:65px}
 /* v56 */
 .nrow{align-items:center}.nrow .tt2{font-size:15px;font-weight:400;color:var(--tx);cursor:pointer}.nrow .sub2{font-size:11px;color:var(--mu);margin-top:2px}.nrow .fn2{color:var(--mu)}
 .nrow .ic{display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:400;color:var(--tx)}.nrow .lk2{width:30px;color:var(--mu)}.nrow .c1{width:160px}.nrow .c2{width:160px}
@@ -2745,19 +2747,44 @@ return `<div class="card"><h3>RSS feed (latest threads)</h3><div class="mu" styl
   const row=(l,f,sub)=>`<div class="tgr"><label>${l}${sub?`<small>${sub}</small>`:''}</label><div>${f}</div></div>`;
   let rows='';
   if(on){
-   if(reg){rows=row('Email:',`<input id="oe" type="email" autocomplete="email">`,'Required')+row('Password:',`<div class="pw"><input id="op" type="password" autocomplete="new-password"><a onclick="pwShow()">${EYE} Show</a></div>`,'Required')+row('Nickname:',`<input id="ou" maxlength="24" autocomplete="username">`,'Required')+(CAP&&CAP.question?row('CAPTCHA:',`<span>${E(CAP.question)}</span> <input id="oc" style="width:110px" placeholder="Answer">`,'Required'):'')+`<div class="tgr"><label></label><div><label class="agr"><input type="checkbox" id="oagree"> I agree to the <a onclick="go('page',0,'terms')">terms</a> and <a onclick="go('page',0,'privacy')">privacy policy</a>.</label></div></div>`}
-   else{rows=row('Your name or email address:',`<input id="ou" autocomplete="username">`)+row('Password:',`<div class="pw"><input id="op" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuth()"><a onclick="pwShow()">${EYE} Show</a></div><a class="fgt" onclick="forgotPw()">Forgot your password?</a>`)+(NEED2?row('2FA code:',`<input id="ot" autocomplete="one-time-code">`):'')+(CAP&&CAP.question&&CAP.show?row('CAPTCHA:',`<span>${E(CAP.question)}</span> <input id="oc" style="width:110px">`):'')+`<div class="tgr"><label></label><div><label class="agr"><input type="checkbox" checked> Stay logged in</label></div></div>`}
+   if(reg){rows=row('Email:',`<input id="oe" type="email" autocomplete="email">`,'Required')+row('Password:',`<div class="pw"><input id="op" type="password" autocomplete="new-password"><a onclick="pwShow()">${EYE} Show</a></div>`,'Required')+row('Nickname:',`<input id="ou" maxlength="24" autocomplete="username">`,'Required')+capRow(true)+`<div class="tgr"><label></label><div><label class="agr"><input type="checkbox" id="oagree"> I agree to the <a onclick="go('page',0,'terms')">terms</a> and <a onclick="go('page',0,'privacy')">privacy policy</a>.</label></div></div>`}
+   else{rows=row('Your name or email address:',`<input id="ou" autocomplete="username">`)+row('Password:',`<div class="pw"><input id="op" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuth()"><a onclick="pwShow()">${EYE} Show</a></div><a class="fgt" onclick="forgotPw()">Forgot your password?</a>`)+(NEED2?row('2FA code:',`<input id="ot" autocomplete="one-time-code">`):'')+capRow(false)+`<div class="tgr"><label></label><div><label class="agr"><input type="checkbox" checked> Stay logged in</label></div></div>`}
   }else{rows=row('Your name:',`<input id="un" maxlength="24">`)+row('Email:',`<input id="em" type="email">`,'New accounts')}
   const btn=reg?'REGISTER':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2.4"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg> LOG IN';
   const act=on?(reg?"authReg()":"doAuth()"):"login()";
   return `<div class="tgdlg"><div class="tgh"><span>${reg?'Register':'Log in'}</span><a onclick="closeAuth()">✕</a></div><div class="tgb">${rows}</div><div class="tgf"><a class="ybtn" onclick="${act}">${btn}</a></div>${reg?'':`<div class="tgs">Don't have an account? <a class="ybtn" onclick="openAuth('reg')">REGISTER NOW</a></div>`}</div>`}
+
+ let TSTOK='',TSID=null;
+ function capRow(reg){if(!ONLINE||!CAP)return '';if(!reg&&!CAP.show)return '';
+  const row=(l,f,sub)=>`<div class="tgr"><label>${l}${sub?`<small>${sub}</small>`:''}</label><div>${f}</div></div>`;
+  if(CAP.turnstile)return row('CAPTCHA:','<div id="tsw" class="tsw"></div>','Required');
+  if(CAP.question)return row('CAPTCHA:',`<div class="capbox"><span class="capq">${E(CAP.question)}</span><input id="oc" placeholder="Your answer" inputmode="numeric" autocomplete="off"></div><small class="mu">Solve the sum to prove you are human.</small>`,'Required');
+  return ''}
+ function mountTurnstile(){const w=document.getElementById('tsw');if(!w||!CAP||!CAP.turnstile)return;TSTOK='';
+  const go=()=>{try{TSID=turnstile.render('#tsw',{sitekey:CAP.turnstile,callback:t=>{TSTOK=t},'expired-callback':()=>{TSTOK=''},'error-callback':()=>{TSTOK=''}})}catch(e){}};
+  if(window.turnstile)return go();if(!window.__tsl){window.__tsl=1;const s=document.createElement('script');s.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';s.async=true;s.onload=()=>{window.__tsr=1;if(document.getElementById('tsw'))go()};document.head.appendChild(s)}
+  else{const t=setInterval(()=>{if(window.turnstile){clearInterval(t);if(document.getElementById('tsw'))go()}},200);setTimeout(()=>clearInterval(t),15000)}}
+ function capPayload(){if(!CAP)return undefined;if(CAP.turnstile)return {turnstile:TSTOK};if(CAP.question)return {token:CAP.token,answer:(document.getElementById('oc')||{}).value||''};return undefined}
+ doAuth=async function(){const g=i=>{const e=document.getElementById(i);return e?e.value.trim():''};
+  try{
+   if(AUM==='reg'){const ag=document.getElementById('oagree');if(ag&&!ag.checked)return alert('You must agree to the terms and privacy policy.');if(CAP&&CAP.turnstile&&!TSTOK)return alert('Please complete the CAPTCHA first.');
+    const r=await api('POST','/auth/register',{username:g('ou'),email:g('oe'),password:(document.getElementById('op')||{}).value||'',captcha:capPayload()});
+    AUM='login';toast(r.needs_verification?'Account created. Check your email to confirm it, then log in.':'Account created. You can log in now.');try{await newCap()}catch(e){}openAuth('login');return}
+   const body={username:g('ou'),password:(document.getElementById('op')||{}).value||''};if(NEED2)body.totp=g('ot');
+   if(CAP&&CAP.show){if(CAP.turnstile&&!TSTOK)return alert('Please complete the CAPTCHA first.');body.captcha=capPayload()}
+   const r=await api('POST','/auth/login',body);CSRF=r.csrf;NEED2=false;CAP=null;const m=await api('GET','/me');CSRF=m.csrf||CSRF;setMe(m.user);closeAuth();await loadForums();await loadLatest();go('home')}
+  catch(e){
+   if(e.data&&e.data.needs_2fa){NEED2=true;openAuth(AUM==='reg'?'reg':'login');toast('Enter your 2FA code');return}
+   if(e.data&&e.data.captcha){try{await newCap();if(CAP)CAP.show=1}catch(x){}openAuth(AUM==='reg'?'reg':'login');toast(AUM==='reg'?'Please solve the CAPTCHA and try again.':'Please solve the CAPTCHA to continue.');return}
+   if(AUM==='reg'){try{await newCap()}catch(x){}}
+   alert(e.message);if(document.getElementById('aum')&&CAP&&CAP.turnstile)mountTurnstile()}};
  window.pwShow=()=>{const i=document.getElementById('op');if(i)i.type=i.type==='password'?'text':'password'};
  window.authReg=()=>{const a=document.getElementById('oagree');if(a&&!a.checked)return alert('Please agree to the terms and privacy policy.');AUM='reg';doAuth()};
  window.openAuth=function(mode){const reg=mode==='reg';AUM=reg?'reg':'login';const keep={};document.querySelectorAll('#aum input').forEach(i=>{if(i.id)keep[i.id]=i.value});
   closeAuth(true);if(ONLINE&&!CAP&&reg){try{newCap().then(()=>{if(AUOPEN)openAuth('reg')})}catch(e){}}
   const d=document.createElement('div');d.id='aum';d.className='tgmod';d.onclick=e=>{if(e.target===d)closeAuth()};d.innerHTML=authHTML(reg);document.body.appendChild(d);AUOPEN=true;
   for(const k in keep){const i=document.getElementById(k);if(i&&i.type!=='checkbox')i.value=keep[k]}
-  const f=d.querySelector('input');if(f)f.focus();d.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter'){const b=d.querySelector('.tgf .ybtn');if(b)b.click()}}))};
+  const f=d.querySelector('input');if(f)f.focus();mountTurnstile();d.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter'){const b=d.querySelector('.tgf .ybtn');if(b)b.click()}}))};
  window.closeAuth=function(keepFlag){const d=document.getElementById('aum');if(d)d.remove();if(!keepFlag)AUOPEN=false};
  /* ---------- 5. search dropdown like the reference ---------- */
  const _pn=panel;panel=function(){if(P==='sr'){return `<div class="pnl srp"><div class="srh">Search</div><input id="sq2" placeholder="Search…" onkeydown="if(event.key==='Enter')go('search',0,{q:sq2.value,t:st2.checked,b:sb2.value})"><label class="srl"><input type="checkbox" id="st2"> Search titles only</label><div class="srm"><span>By:</span><input id="sb2" placeholder="Member"></div><div class="srf"><a class="ybtn" onclick="go('search',0,{q:sq2.value,t:st2.checked,b:sb2.value})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg> SEARCH</a><a class="ybtn" onclick="go('search')">ADVANCED SEARCH…</a></div></div>`}return _pn.apply(this,arguments)};
