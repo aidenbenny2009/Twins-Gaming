@@ -131,6 +131,11 @@ export async function seed(db, brand = {}) {
   const ca = await forum(c3, 'Complaints about administrators and assistants', 2); await forum(c3, '🗄️ Archive', 1, ca);
   const cm = await forum(c3, 'Complaints about Members', 3); await forum(c3, '🗄️ Archive', 1, cm);
   const ccr = await forum(c3, 'Community Rules', 0, null, STAFF);
+  const cEv = await cat('Global events', 4); await forum(cEv, 'Global events', 1, null, STAFF);
+  const cLg = await cat('Languages', 5); let ls = 1; for (const l of ['EN', 'DE', 'RS', 'IT', 'FR', 'PT', 'ES', 'JP']) await forum(cLg, l + ' – Community', ls++);
+  const cGs = await cat('Game servers', 6);
+  for (const sv of ['Server 1', 'Server 2']) { const g = await forum(cGs, sv, sv === 'Server 1' ? 1 : 2, null, STAFF); await forum(cGs, sv + ' – Rules', 1, g, STAFF); await forum(cGs, sv + ' – Complaints', 2, g); await forum(cGs, sv + ' – Applications', 3, g); await forum(cGs, sv + ' – 🗄️ Archive', 4, g); }
+  const cZn = await cat('Zones', 7); const sa = await forum(cZn, 'Staff applications', 1); await forum(cZn, 'Pending review', 1, sa); await forum(cZn, 'Approved', 2, sa, STAFF); await forum(cZn, 'Rejected', 3, sa, STAFF);
   if (!(await db.one("SELECT 1 x FROM forums WHERE link_url IS NOT NULL"))) await db.q("INSERT INTO forums (category_id,name,sort,visibility,thread_perm,link_url) VALUES ($1,'Connect to the official channel in Discord',9,'public','CREATE_THREAD',$2)", [c2, 'https://discord.gg/fR4ZmKYaHH']);
   await db.q("UPDATE forums SET is_archive=true WHERE name ILIKE '%Archive' AND NOT is_archive");
 }
