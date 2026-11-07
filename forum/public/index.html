@@ -270,6 +270,18 @@ body.dk .cd2,body.dk .qt{border-color:#2fa4e7}
 .ttabs a{color:#8a9bb5}.ttabs a.on{color:var(--tx)}
 .pgn a{font-size:12px}.pgn a.on{background:#ee4a85;color:#fff}.pgn a:not(.on):not(.gap){background:#0aa0ec;color:#fff}
 .arow .at,.arow .at a,.arow .at b{font-weight:400!important}
+#ldr{position:fixed;inset:0;z-index:99999;background:var(--bg,#fff);display:flex;align-items:center;justify-content:center;transition:opacity .5s}
+#ldr.out{opacity:0;pointer-events:none}
+#ldr .ldi{text-align:center}#ldr img{max-width:180px;max-height:90px;display:block;margin:0 auto 18px}
+#ldr .ldb{width:160px;height:4px;background:#0002;border-radius:4px;overflow:hidden;margin:auto}
+#ldr .ldb i{display:block;height:100%;width:40%;background:#ffc21a;animation:ldm 1s infinite ease-in-out}
+@keyframes ldm{0%{margin-left:-40%}100%{margin-left:100%}}
+.hmb{display:none;cursor:pointer;font-weight:700;padding:6px 10px}
+#mdr{position:fixed;inset:0;z-index:9000}#mdr .mbg{position:absolute;inset:0;background:#0006}
+#mdr .mpn{position:absolute;left:0;top:0;bottom:0;width:78%;max-width:300px;background:var(--card,#fff);padding:14px;overflow:auto;box-shadow:2px 0 12px #0004}
+#mdr .mpn b{display:block;margin-bottom:10px;font-size:18px}#mdr .mpn a{display:block;padding:12px 4px;border-bottom:1px solid var(--line,#e3e5ee);cursor:pointer}
+.inst{cursor:pointer;margin-left:12px}
+@media(max-width:760px){.hmb{display:inline-block}.hd nav{display:none!important}}
 </style><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&display=swap"></head><body><div id="app"></div>
 <script>
 const PERMS=['VIEW_FORUM','CREATE_THREAD','REPLY','DELETE_ANY_POST','LOCK_THREADS','PIN_THREADS','BAN_USERS','MANAGE_FORUMS','MANAGE_USERS','VIEW_AUDIT_LOGS','MANAGE_THEME','MANAGE_ROLES','MANAGE_SETTINGS'];
@@ -2825,6 +2837,48 @@ return `<div class="card"><h3>RSS feed (latest threads)</h3><div class="mu" styl
    document.querySelectorAll('.sbar .dd').forEach(e=>e.remove());document.querySelectorAll('.sbar a[onclick="markRead()"]').forEach(e=>e.remove());
    document.querySelectorAll('.ttabs a').forEach(a=>{if(/profposts|'mine'/.test(a.getAttribute('onclick')||''))a.remove()});
    document.querySelectorAll('.fbar .pill2,.fhd2').forEach(e=>e.remove())}}catch(e){}return x};
+})();
+/* v57: fade loader, head meta/manifest, PWA install, mobile menu drawer, preview-only demo boards/data */
+(function(){
+ // head meta (descriptions, share image, icon, manifest)
+ try{const h=document.head,add=(t,a)=>{const e=document.createElement(t);for(const k in a)e.setAttribute(k,a[k]);h.appendChild(e)};
+  const d='Twins Gaming community forum: rules, support, game servers, complaints and news.';
+  if(!document.querySelector('meta[name=description]'))add('meta',{name:'description',content:d});
+  add('meta',{property:'og:title',content:'Twins Gaming'});add('meta',{property:'og:description',content:d});add('meta',{property:'og:type',content:'website'});
+  add('meta',{name:'theme-color',content:'#ffc21a'});
+  if(typeof LOGO!=='undefined'){add('meta',{property:'og:image',content:LOGO});add('link',{rel:'icon',href:LOGO})}
+  add('link',{rel:'canonical',href:location.origin+location.pathname});
+  add('link',{rel:'manifest',href:'/manifest.webmanifest'});
+ }catch(e){}
+ // full-screen loader that fades out
+ const ld=document.createElement('div');ld.id='ldr';ld.innerHTML='<div class="ldi">'+(typeof LOGO!=='undefined'?'<img src="'+LOGO+'" alt="">':'')+'<div class="ldb"><i></i></div></div>';
+ document.body.appendChild(ld);
+ let gone=0;const hide=()=>{if(gone)return;gone=1;ld.classList.add('out');setTimeout(()=>ld.remove(),600)};
+ const _rl=render;render=function(){const r=_rl.apply(this,arguments);if(!document.querySelector('#app .splash'))setTimeout(hide,50);return r};
+ setTimeout(hide,8000);
+ // PWA install
+ let dip=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;document.body.classList.add('canins');patch()});
+ window.installApp=async function(){if(!dip)return alert('Open this site in Chrome or Edge, then use the browser menu: Install app / Add to Home screen.');dip.prompt();try{await dip.userChoice}catch(e){}dip=null;document.body.classList.remove('canins')};
+ // mobile menu drawer
+ window.openMenu=function(){let m=document.getElementById('mdr');if(m){m.remove();return}
+  const hd=document.querySelector('.hd nav');const links=hd?[...hd.querySelectorAll('a')].map(a=>`<a onclick="document.getElementById('mdr').remove();${(a.getAttribute('onclick')||'').replace(/"/g,'&quot;')}">${a.innerHTML}</a>`).join(''):'';
+  m=document.createElement('div');m.id='mdr';m.innerHTML=`<div class="mbg" onclick="document.getElementById('mdr').remove()"></div><div class="mpn"><b>Menu</b>${links}<a onclick="installApp()">Install the app</a></div>`;document.body.appendChild(m)};
+ function patch(){const hd=document.querySelector('.hd');if(!hd)return;
+  if(!hd.querySelector('.hmb')){const b=document.createElement('a');b.className='hmb';b.textContent='☰ Menu';b.onclick=openMenu;hd.insertBefore(b,hd.firstChild)}
+  const ft=document.querySelector('footer,.foot,.ft');if(ft&&!ft.querySelector('.inst')&&document.body.classList.contains('canins')){const a=document.createElement('a');a.className='inst';a.textContent='Install the app';a.onclick=installApp;ft.appendChild(a)}}
+ const _r2=render;render=function(){const r=_r2.apply(this,arguments);try{patch()}catch(e){}return r};
+ // preview-only demo data (never runs when connected to the real server)
+ const _b=bootOnline;bootOnline=async function(){await _b.apply(this,arguments);if(ONLINE||S.demo57)return;try{
+  const mk=(n,r)=>({id:uid(),n,role:r,email:n.toLowerCase()+'@example.com',joined:Date.now()-864e5*30});
+  const us=['Alex','Sam','Riley','Jordan'].map(n=>mk(n,'member'));us.forEach(u=>{if(!S.users.find(x=>x.n===u.n))S.users.push(u)});
+  const F=(n,d)=>({id:uid(),n,d:d||''});const cat=(n,f)=>{if(!S.cats.find(c=>c.n===n))S.cats.push({id:uid(),n,f})};
+  cat('Global events',[F('Global events','Server-wide events and announcements')]);
+  cat('Languages',['EN','DE','RS','IT','FR','PT','ES','JP'].map(l=>F(l+' – Community','Discussion in '+l)));
+  cat('Game servers',['Server 1','Server 2'].flatMap(s=>[F(s+' – Rules'),F(s+' – Complaints'),F(s+' – Applications'),F(s+' – Archive','Closed threads')]));
+  cat('Zones',[F('Staff applications – Pending review'),F('Staff applications – Approved'),F('Staff applications – Rejected')]);
+  const fs=S.cats.flatMap(c=>c.f);const ti=['Welcome to Twins Gaming','How to file a complaint','Server rules','Unban request','Event this weekend','Looking for a team','Bug report','Suggestion: new map','Voting results','Application for moderator','Patch notes','Need help with login','Giveaway','Streamer corner','Screenshots','Tips and tricks','FAQ','Looking for players','Ban appeal','Feedback'];
+  ti.forEach((t,i)=>{const f=fs[i%fs.length],a=us[i%us.length],tm=Date.now()-864e5*(i+1);S.threads.push({id:uid(),fid:f.id,title:t,pre:'',pin:i<2?1:0,lock:0,views:20+i*7,last:tm,posts:[{id:uid(),a:a.id,t:tm,c:'Placeholder content for preview.'}]})});
+  S.demo57=1;save();render()}catch(e){console.warn('demo57',e)}};
 })();
 
 bootOnline();
