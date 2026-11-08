@@ -8,6 +8,8 @@ const cfg = loadConfig();
 const db = await openDb({ url: cfg.databaseUrl, memory: !cfg.databaseUrl });
 if (!cfg.databaseUrl) console.warn('[warn] DATABASE_URL not set: using a temporary in-memory database (data is lost on exit).');
 await applySchema(db); await seed(db);
+// Optional: promote an EXISTING account to Owner by setting OWNER_PROMOTE_EMAIL in Render (remove it afterwards).
+if (process.env.OWNER_PROMOTE_EMAIL) { const r = await db.one('UPDATE users SET is_owner=true, email_verified=true WHERE lower(email)=lower($1) RETURNING username', [process.env.OWNER_PROMOTE_EMAIL.trim()]); console.log(r ? 'Promoted to Owner: ' + r.username : 'OWNER_PROMOTE_EMAIL: no account with that email'); }
 // First start only: create the Owner from environment variables (no terminal needed). Remove OWNER_PASSWORD afterwards.
 if (process.env.OWNER_USERNAME && process.env.OWNER_EMAIL && process.env.OWNER_PASSWORD && !(await db.one('SELECT 1 x FROM users WHERE is_owner'))) {
   const bad = passwordProblem(process.env.OWNER_PASSWORD, 12);
